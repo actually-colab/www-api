@@ -4,6 +4,7 @@ npm-debug.*
 
 .webpack
 .serverless
+.dynamodb
 
 coverage
 

@@ -7,12 +7,25 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-domain-manager
+  - serverless-dynamodb-local
 
 provider:
   name: aws
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: us-east-1
+
+  iamRoleStatements:
+  - Effect: 'Allow'
+    Action:
+      - dynamodb:Query
+      - dynamodb:Scan
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:UpdateItem
+      - dynamodb:DeleteItem
+    Resource:
+      - "Fn::GetAtt": [waitlistTable, Arn]
 
   environment:
     EXECUTION_STAGE: ${self:provider.stage}
@@ -25,7 +38,19 @@ provider:
     MAIL_PASSWORD: ${env:MAIL_PASSWORD}
   
   httpApi:
-    cors: ${self:custom.restCorsPolicy}
+    cors:
+      allowedOrigins:
+        - 'http://localhost:3000'
+        - 'https://www.actuallycolab.org'
+        - 'https://actuallycolab.org'
+      allowedHeaders:
+        - Content-Type
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+        - X-Amz-User-Agent
+      allowCredentials: false
 
   logs:
     httpApi: true
@@ -36,11 +61,23 @@ package:
 custom:
   stages:
     - dev
-    - test
     - production
 
   dynamoTableNames:
     waitlistTableName: Waitlist
+
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+      dbPath: "./.dynamodb/db"
 
   customDomain:
     http:
@@ -64,19 +101,21 @@ custom:
     packagerOptions:
       noFrozenLockfile: true
 
-  restCorsPolicy:
-    origins:
-      - 'http://localhost:3000'
-      - 'https://www.actuallycolab.org'
-      - 'https://actuallycolab.org'
-    headers:
-      - Content-Type
-      - X-Amz-Date
-      - Authorization
-      - X-Api-Key
-      - X-Amz-Security-Token
-      - X-Amz-User-Agent
-    allowCredentials: false
+resources:
+  Resources:
+    activeSessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.dynamoTableNames.waitlistTableName}
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 functions:
   join-waitlist:
@@ -85,4 +124,3 @@ functions:
       - httpApi:
           path: /waitlist
           method: post
-          cors: ${self:custom.restCorsPolicy}

@@ -6,6 +6,8 @@ import type {
 import { ShallotAWSRestWrapper } from "@shallot/rest-wrapper";
 import createHTTPError from "http-errors";
 
+import dynamodb, { waitlistTableName } from './dynamo';
+
 type TEvent = TShallotHttpEvent<
   unknown,
   unknown,
@@ -17,6 +19,17 @@ const _handler: ShallotRawHandler<TEvent> = async ({ body }) => {
   if (body?.email == null) {
     throw new createHTTPError.BadRequest('email must be defined');
   }
+
+  await dynamodb.docClient
+    .put({
+      Item: {
+        email: body.email,
+        job: body.job,
+        reason: body.reason,
+      },
+      TableName: waitlistTableName,
+    })
+    .promise();
 
   return { message: "success" };
 };
