@@ -83,6 +83,6 @@ functions:
     handler: src/waitlist.handler
     events:
       - httpApi:
-          path: /login
+          path: /waitlist
           method: post
           cors: ${self:custom.restCorsPolicy}
