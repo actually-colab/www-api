@@ -33,9 +33,9 @@ provider:
 
     AC_DDB_WAITLIST_TABLE_NAME: ${self:custom.dynamoTableNames.waitlistTableName}
 
-    MAIL_HOST: ${env:MAIL_HOST}
-    MAIL_USERNAME: ${env:MAIL_USERNAME}
-    MAIL_PASSWORD: ${env:MAIL_PASSWORD}
+    # MAIL_HOST: ${env:MAIL_HOST}
+    # MAIL_USERNAME: ${env:MAIL_USERNAME}
+    # MAIL_PASSWORD: ${env:MAIL_PASSWORD}
   
   httpApi:
     cors:
@@ -103,7 +103,7 @@ custom:
 
 resources:
   Resources:
-    activeSessionsTable:
+    waitlistTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.dynamoTableNames.waitlistTableName}
