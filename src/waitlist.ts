@@ -6,7 +6,7 @@ import type {
 import { ShallotAWSRestWrapper } from "@shallot/rest-wrapper";
 import createHTTPError from "http-errors";
 
-import dynamodb, { waitlistTableName } from './dynamo';
+import dynamodb, { waitlistTableName } from "./dynamo";
 
 type TEvent = TShallotHttpEvent<
   unknown,
@@ -17,7 +17,7 @@ type TEvent = TShallotHttpEvent<
 
 const _handler: ShallotRawHandler<TEvent> = async ({ body }) => {
   if (body?.email == null) {
-    throw new createHTTPError.BadRequest('email must be defined');
+    throw new createHTTPError.BadRequest("email must be defined");
   }
 
   await dynamodb.docClient
@@ -39,7 +39,7 @@ export const handler = ShallotAWSRestWrapper(_handler, undefined, {
   HttpCorsOpts: {
     allowHeaders: "Authorization",
     allowedOrigins: [
-      "http://localhost:3000",
+      "http://localhost:4000",
       "https://actuallycolab.org",
       "https://www.actuallycolab.org",
     ],
