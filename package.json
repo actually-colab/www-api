@@ -1,0 +1,45 @@
+{
+  "name": "@actually-colab/www-api",
+  "version": "0.1.0",
+  "description": "Supporting API endpoints for https://actuallycolab.org",
+  "license": "GPL-2.0-only",
+  "keywords": [
+    "typescript",
+    "lambda",
+    "aws",
+    "serverless",
+    "rest"
+  ],
+  "scripts": {
+    "start": "yarn sls offline start",
+    "deploy": "yarn serverless deploy --aws-profile ac-bailey",
+    "deploy:domain": "yarn serverless create_domain --aws-profile ac-bailey",
+    "deploy:prod": "yarn deploy -s production",
+    "deploy:domain:prod": "yarn deploy:domain -s production"
+  },
+  "dependencies": {
+    "@shallot/http-error-handler": "^1.0.2",
+    "@shallot/rest-wrapper": "^1.1.3",
+    "aws-sdk": "^2.842.0",
+    "http-errors": "^1.8.0",
+    "nodemailer": "^6.5.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.67",
+    "@types/aws-sdk": "^2.7.0",
+    "@types/http-errors": "^1.8.0",
+    "@types/webpack-node-externals": "^2.5.0",
+    "serverless": "^2.31.0",
+    "serverless-domain-manager": "^5.1.0",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^6.9.0",
+    "serverless-stage-manager": "^1.0.5",
+    "serverless-webpack": "^5.4.0",
+    "source-map-support": "^0.5.19",
+    "ts-loader": "^8.0.12",
+    "typescript": "^4.2.3",
+    "webpack": "^5.11.0",
+    "webpack-node-externals": "^2.5.2",
+    "yarn": "^1.22.10"
+  }
+}

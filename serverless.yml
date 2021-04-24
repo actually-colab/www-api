@@ -1,0 +1,88 @@
+service: actually-colab-www-api
+
+useDotenv: true
+
+plugins:
+  - serverless-stage-manager
+  - serverless-webpack
+  - serverless-offline
+  - serverless-domain-manager
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+
+  environment:
+    EXECUTION_STAGE: ${self:provider.stage}
+    AWS_DEPLOYMENT_REGION: ${self:provider.region}
+
+    AC_DDB_WAITLIST_TABLE_NAME: ${self:custom.dynamoTableNames.waitlistTableName}
+
+    MAIL_HOST: ${env:MAIL_HOST}
+    MAIL_USERNAME: ${env:MAIL_USERNAME}
+    MAIL_PASSWORD: ${env:MAIL_PASSWORD}
+  
+  httpApi:
+    cors: ${self:custom.restCorsPolicy}
+
+  logs:
+    httpApi: true
+
+package:
+  individually: true
+
+custom:
+  stages:
+    - dev
+    - test
+    - production
+
+  dynamoTableNames:
+    waitlistTableName: Waitlist
+
+  customDomain:
+    http:
+      domainName: www.api.actuallycolab.org
+      stage: ${opt:stage, 'dev'}
+      basePath: ${opt:stage, 'dev'}
+      certificateName: '*.api.actuallycolab.org'
+      createRoute53Record: true
+      endpointType: regional
+      securityPolicy: tls_1_2
+
+  serverless-offline:
+    stage: ${self:provider.stage}
+
+  webpack:
+    webpackConfig: 'webpack.config.ts'
+    packager: 'yarn'
+    includeModules:
+      forceExclude:
+        - aws-sdk
+    packagerOptions:
+      noFrozenLockfile: true
+
+  restCorsPolicy:
+    origins:
+      - 'http://localhost:3000'
+      - 'https://www.actuallycolab.org'
+      - 'https://actuallycolab.org'
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: false
+
+functions:
+  join-waitlist:
+    handler: src/waitlist.handler
+    events:
+      - httpApi:
+          path: /login
+          method: post
+          cors: ${self:custom.restCorsPolicy}
